@@ -1,42 +1,50 @@
 import sys
+from pathlib import Path
 
 from parsing.config import Config
 from parsing.directory import list_files_in_directory
 from parsing.parse_xls import XLSParser, RawWood
-from wood_objects.wood import Wood, Trunk
+from wood_objects.wood import WoodWaste
 
 config = Config()
 
 
-def parse() -> list[Wood]:
+def main() -> None:
 
     # Чтение файлов таблиц
     files_for_parse = list_files_in_directory(config.settings.parse_directory)
-    raw_woods = []
+
     for file in files_for_parse:
-        wood_of_file = XLSParser().parse(file)
-        raw_woods.extend(wood_of_file)
+        raw_woods = XLSParser().parse(file)
 
-    woods = []
-    # Парсинг таблиц
-    for wood_list in raw_woods:
-        raw_wood = RawWood(*wood_list)
-        try:
-            if raw_wood.is_valid():
-                for wood in raw_wood.parse():
-                    woods.append(wood)
-        except Exception as e:
-            print(e)
+        woods = []
+        # Парсинг таблиц
+        for wood_list in raw_woods:
+            raw_wood = RawWood(*wood_list)
+            try:
+                if raw_wood.is_valid():
+                    for wood in raw_wood.parse():
+                        woods.append(wood)
+            except Exception as e:
+                print(e)
 
-    # TODO: Обработка непрочитанных деревьев
-    if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
-        sys.exit(0)
+        # TODO: Обработка непрочитанных деревьев
+        if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
+            sys.exit(0)
 
-    for wood in woods:
-        print(wood)
+        result_wood = []
+        result_shrub = []
+        for wood in woods:
+            w = WoodWaste(wood.name, wood.number, wood.specie, wood.is_shrub, wood.trunks, wood.area)
+            w.export_preparation()
+            if w.is_shrub:
+                result_shrub.append(w.data)
+            else:
+                result_wood.append(w.data)
 
-    return woods
+        file_path = Path(file)
+        file_out_wood = file_path.parent.parent / "out" / f"{file_path.stem}_out_wood{file_path.suffix}"
+        file_out_shrub = file_path.parent.parent / "out" / f"{file_path.stem}_out_shrub{file_path.suffix}"
 
-
-def main() -> None:
-    source_woods = parse()
+        WoodWaste.export_to_xls(result_wood, file_out_wood)
+        WoodWaste.export_to_xls(result_shrub, file_out_shrub)
