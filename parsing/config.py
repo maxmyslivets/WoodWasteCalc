@@ -37,6 +37,10 @@ class Settings(ConfigSection):
     def volumes_xls_path(self):
         return self.get('volumes_xls_path')
 
+    @property
+    def density_json_path(self):
+        return self.get('density_json_path')
+
 
 class Config:
     def __init__(self, filename: str = 'config.ini'):
