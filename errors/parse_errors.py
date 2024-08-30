@@ -24,3 +24,7 @@ class ParseDiameterError(ParseError):
 
 class ParseHeightError(ParseError):
     pass
+
+
+class ParseDensityError(ParseError):
+    pass
