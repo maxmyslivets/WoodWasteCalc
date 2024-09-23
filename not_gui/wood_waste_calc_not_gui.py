@@ -32,8 +32,10 @@ def main() -> None:
         if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
             sys.exit(0)
 
-        result_wood = []
-        result_shrub = []
+        result_wood = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "плотность", "стволы", "сучья",
+                         "пни"]],]
+        result_shrub = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "площадь", "плотность",
+                          "сучья", "пни"]],]
         for wood in woods:
             w = WoodWaste(wood.name, wood.number, wood.specie, wood.is_shrub, wood.trunks, wood.area)
             w.export_preparation()

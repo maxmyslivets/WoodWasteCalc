@@ -83,12 +83,17 @@ class WoodWaste(Wood):
             for idx, trunk in enumerate(self.trunks):
                 self.data.append(
                     [self.number if idx == 0 else None, self.name if idx == 0 else None,
-                     1, trunk.diameter, trunk.height, trunk.volume, self.density]
+                     1, trunk.diameter, trunk.height, trunk.volume, self.density,
+                     f"=1*{self.density}/1000*{trunk.volume}", f"=1*{self.density}/1000*{trunk.volume}*0.2",
+                     f"=1*{self.density}/1000*{trunk.volume}*0.11" if idx == 0 else None]
                 )
         else:
             self.data.append(
                 [self.number, self.name, 3 if self.area else 1, self.trunks[0].diameter, self.trunks[0].height,
-                 self.trunks[0].volume, self.area if self.area else 1 / 3, self.density]
+                 self.trunks[0].volume, self.area if self.area else '=1/3', self.density,
+                 f"={3 if self.area else 1}*{self.trunks[0].volume}*{self.area if self.area else '1/3'}*"
+                 f"{self.density/1000}", f"={3 if self.area else 1}*{self.trunks[0].volume}*"
+                                         f"{self.area if self.area else '1/3'}*{self.density/1000}*0.03"]
             )
 
     @staticmethod
