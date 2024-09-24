@@ -43,9 +43,15 @@ class RawWood:
         result = []
         parts = self._number.translate({ord(c): None for c in string.whitespace}).split(',')
         for part in parts:
-            part = part.strip()
+            part = part.strip().replace(' ', '')
             if '-' in part:
                 start, end = part.split('-')
+                try:
+                    start = int(start)
+                    end = int(end)
+                except ValueError as e:
+                    start = start.split('.')[1]
+                    end = end.split('.')[1]
                 result.extend([str(_) for _ in range(int(start), int(end) + 1)])
             else:
                 result.append(part)
@@ -105,6 +111,13 @@ class RawWood:
         :return: список диаметров
         """
 
+        if self._parse_quantity()[0] == 1 and self._diameter.count(",") == 1 and self._parse_specie()["trunk_count"] == 1:
+            return [float(self._diameter.replace(',', '.'))]
+
+        if ';' in self._diameter:
+            self._diameter = self._diameter.replace(',', '.')
+            self._diameter = self._diameter.replace(';', ',')
+
         result = []
 
         try:
@@ -152,8 +165,12 @@ class RawWood:
         :return: список высот
         """
 
-        if self._parse_quantity()[0] == 1 and self._height.count(",") == 1:
+        if self._parse_quantity()[0] == 1 and self._height.count(",") == 1 and self._parse_specie()["trunk_count"] == 1:
             return [float(self._height.replace(',', '.'))]
+
+        if ';' in self._height:
+            self._height = self._height.replace(',', '.')
+            self._height = self._height.replace(';', ',')
 
         result = []
 
@@ -259,6 +276,7 @@ class RawWood:
         diameter = self._parse_diameter()
         height = self._parse_height()
         area = quantity if is_area else None
+
         try:
             for idx_wood in range(len(number)):
                 trunks = []
@@ -273,9 +291,8 @@ class RawWood:
                     trunks.append(Trunk(diameter=diameter[idx_wood], height=height[idx_wood]))
                     woods.append(Wood(name=self._name, number=number[idx_wood], specie=specie, is_shrub=is_shrub,
                                       trunks=trunks, area=area))
-
         except Exception as e:
-            raise ParseError(f"Ошибка получения объекта дерева. {e}")
+            raise ParseError(f"Ошибка получения объекта дерева {self.__repr__()}. {e}")
 
         return woods
 
