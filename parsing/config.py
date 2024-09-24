@@ -26,8 +26,12 @@ class Settings(ConfigSection):
         return self.get_bool('gui')
 
     @property
-    def parse_directory(self):
-        return self.get('parse_directory')
+    def parse_dxf_directory(self):
+        return self.get('parse_dxf_directory')
+
+    @property
+    def parse_xls_directory(self):
+        return self.get('parse_xls_directory')
 
     @property
     def species_json_path(self):

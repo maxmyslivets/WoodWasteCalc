@@ -3,6 +3,8 @@ from pathlib import Path
 
 from parsing.config import Config
 from parsing.directory import list_files_in_directory
+from parsing.dxf import dxf_parse
+from xls.xls_write import xls_write
 from parsing.parse_xls import XLSParser, RawWood
 from wood_objects.wood import WoodWaste
 
@@ -11,13 +13,19 @@ config = Config()
 
 def main() -> None:
 
-    # Чтение файлов таблиц
-    files_for_parse = list_files_in_directory(config.settings.parse_directory)
+    # Парсинг dxf файлов
+    dxf_for_parse = list_files_in_directory(config.settings.parse_dxf_directory)
+    xls_directory = Path(config.settings.parse_xls_directory)
+    for dxf in dxf_for_parse:
+        data, xls_filename = dxf_parse(dxf)
+        xls_write(data, xls_directory/(xls_filename+'.xlsx'))
 
-    for file in files_for_parse:
+    xls_for_parse = list_files_in_directory(config.settings.parse_xls_directory)
+    for file in xls_for_parse:
         raw_woods = XLSParser().parse(file)
 
         woods = []
+        validate = True
         # Парсинг таблиц
         for wood_list in raw_woods:
             raw_wood = RawWood(*wood_list)
@@ -26,11 +34,13 @@ def main() -> None:
                     for wood in raw_wood.parse():
                         woods.append(wood)
             except Exception as e:
+                validate = False
                 print(e)
 
         # TODO: Обработка непрочитанных деревьев
-        if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
-            sys.exit(0)
+        if not validate:
+            if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
+                sys.exit(0)
 
         result_wood = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "плотность", "стволы", "сучья",
                          "пни"]],]
