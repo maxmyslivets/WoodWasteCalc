@@ -1,4 +1,5 @@
 import configparser
+from pathlib import Path
 
 
 class ConfigSection:
@@ -22,32 +23,44 @@ class ConfigSection:
 
 class Settings(ConfigSection):
     @property
-    def gui(self):
+    def gui(self) -> bool:
         return self.get_bool('gui')
 
     @property
-    def parse_dxf_directory(self):
-        return self.get('parse_dxf_directory')
+    def dwg_directory(self) -> Path:
+        return Path(self.get('dwg_directory'))
 
     @property
-    def parse_xls_directory(self):
-        return self.get('parse_xls_directory')
+    def dxf_directory(self) -> Path:
+        return Path(self.get('dxf_directory'))
 
     @property
-    def species_json_path(self):
-        return self.get('species_json_path')
+    def xls_directory(self) -> Path:
+        return Path(self.get('xls_directory'))
 
     @property
-    def volumes_xls_path(self):
-        return self.get('volumes_xls_path')
+    def out_directory(self) -> Path:
+        return Path(self.get('out_directory'))
 
     @property
-    def density_json_path(self):
-        return self.get('density_json_path')
+    def species_json_path(self) -> Path:
+        return Path(self.get('species_json_path'))
+
+    @property
+    def volumes_xls_path(self) -> Path:
+        return Path(self.get('volumes_xls_path'))
+
+    @property
+    def density_json_path(self) -> Path:
+        return Path(self.get('density_json_path'))
+
+    @property
+    def input_table_structure(self) -> list:
+        return self.get_list('input_table_structure')
 
 
 class Config:
-    def __init__(self, filename: str = 'config.ini'):
+    def __init__(self, filename: Path = Path('config.ini')):
         self.config = configparser.ConfigParser()
         self.config.read(filename, encoding='utf-8')
 
