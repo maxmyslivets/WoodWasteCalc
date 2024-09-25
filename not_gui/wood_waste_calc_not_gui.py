@@ -1,7 +1,3 @@
-import sys
-from pathlib import Path
-
-
 from parsing.config import Config
 from parsing.directory import get_files_in_directory
 from parsing.parse_xls import XLSParser, RawWood
@@ -30,10 +26,9 @@ def main() -> None:
                 validate = False
                 print(e)
 
-        # TODO: Обработка непрочитанных деревьев
         if not validate:
-            if input("Имеются ошибки в некоторых исходных данных. Продолжать (пустой ввода, если да)?") != "":
-                sys.exit(0)
+            print(f"Файл `{file.name}` имеет нераспознанные данные и не будет обработан")
+            continue
 
         result_wood = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "плотность", "стволы", "сучья",
                          "пни"]],]
@@ -47,9 +42,7 @@ def main() -> None:
             else:
                 result_wood.append(w.data)
 
-        file_path = Path(file)
-        file_out_wood = file_path.parent.parent / "out" / f"{file_path.stem}_out_wood{file_path.suffix}"
-        file_out_shrub = file_path.parent.parent / "out" / f"{file_path.stem}_out_shrub{file_path.suffix}"
-
-        WoodWaste.export_to_xls(result_wood, file_out_wood)
-        WoodWaste.export_to_xls(result_shrub, file_out_shrub)
+        WoodWaste.export_to_xls(result_wood,
+                                config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
+        WoodWaste.export_to_xls(result_shrub,
+                                config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
