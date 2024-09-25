@@ -1,6 +1,6 @@
 from parsing.config import Config
 
-GUI = Config().settings.gui
+GUI = Config().gui.gui
 
 if not GUI:
     from not_gui.wood_waste_calc_not_gui import main

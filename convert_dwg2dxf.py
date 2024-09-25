@@ -11,7 +11,7 @@ def convert_dwg_to_dxf() -> None:
         install_converter()
 
     # конвертация dwg в dxf
-    dwg2dxf(config.settings.dwg_directory, config.settings.dxf_directory)
+    dwg2dxf(config.directories.dwg_directory, config.directories.dxf_directory)
 
 
 if __name__ == '__main__':

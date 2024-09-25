@@ -1,6 +1,7 @@
 import string
 import re
-from openpyxl import load_workbook, Workbook
+from pathlib import Path
+from openpyxl import load_workbook
 
 from wood_objects.wood import Wood, Trunk
 from errors.parse_errors import *
@@ -11,7 +12,7 @@ config = Config()
 
 from .species_db import read_species_from_json
 
-shrub_species, wood_species = read_species_from_json(config.settings.species_json_path)
+shrub_species, wood_species = read_species_from_json(config.taxation_characteristics.species_json_path)
 
 
 class RawWood:
@@ -301,20 +302,19 @@ class XLSParser:
     """
     Класс для чтения excel файлов.
 
-    Входной файл должен иметь следующую структуру:
-    1 строка — заголовки таблиц или пусто;
-    A — номер;
-    B — наименование;
-    C — количество;
-    D — диаметр;
-    E — высота;
+    1 строка входного файла должна представлять заголовки таблицы.
     """
     def __init__(self) -> None:
 
-        self.columns = ['A', 'B', 'C', 'D', 'E']
-        # TODO: добавить настройку структуры excel файла
+        self.columns = [
+            config.table_structure.number,
+            config.table_structure.specie,
+            config.table_structure.quality,
+            config.table_structure.diameter,
+            config.table_structure.height
+        ]
 
-    def parse(self, filepath: str) -> list:     # TODO: Try-Except
+    def parse(self, filepath: Path) -> list:     # TODO: Try-Except
         """
         Парсинг excel файла. Получение двумерного массива данных таблицы.
         :param filepath: путь до файла

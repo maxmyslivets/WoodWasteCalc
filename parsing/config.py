@@ -21,10 +21,13 @@ class ConfigSection:
         return self.config.getboolean(self.section, key, fallback=default)
 
 
-class Settings(ConfigSection):
+class Gui(ConfigSection):
     @property
     def gui(self) -> bool:
         return self.get_bool('gui')
+
+
+class Directories(ConfigSection):
 
     @property
     def dwg_directory(self) -> Path:
@@ -42,6 +45,9 @@ class Settings(ConfigSection):
     def out_directory(self) -> Path:
         return Path(self.get('out_directory'))
 
+
+class TaxationCharacteristics(ConfigSection):
+
     @property
     def species_json_path(self) -> Path:
         return Path(self.get('species_json_path'))
@@ -54,9 +60,28 @@ class Settings(ConfigSection):
     def density_json_path(self) -> Path:
         return Path(self.get('density_json_path'))
 
+
+class TableStructure(ConfigSection):
+
     @property
-    def input_table_structure(self) -> list:
-        return self.get_list('input_table_structure')
+    def number(self) -> str:
+        return self.get('number')
+
+    @property
+    def specie(self) -> str:
+        return self.get('specie')
+
+    @property
+    def quality(self) -> str:
+        return self.get('quality')
+
+    @property
+    def height(self) -> str:
+        return self.get('height')
+
+    @property
+    def diameter(self) -> str:
+        return self.get('diameter')
 
 
 class Config:
@@ -65,5 +90,17 @@ class Config:
         self.config.read(filename, encoding='utf-8')
 
     @property
-    def settings(self):
-        return Settings(self.config, 'Settings')
+    def gui(self):
+        return Gui(self.config, 'GUI')
+
+    @property
+    def directories(self):
+        return Directories(self.config, 'DIRECTORIES')
+
+    @property
+    def taxation_characteristics(self):
+        return TaxationCharacteristics(self.config, 'TAXATION_CHARACTERISTICS')
+
+    @property
+    def table_structure(self):
+        return TableStructure(self.config, 'TABLE_STRUCTURE')

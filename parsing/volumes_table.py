@@ -3,12 +3,12 @@ from openpyxl import load_workbook
 
 from .config import Config
 
-config = Config().settings
+config = Config()
 
 
 class Volume:
     def __init__(self):
-        self.filepath = config.volumes_xls_path
+        self.filepath = config.taxation_characteristics.volumes_xls_path
         self.columns = list(string.ascii_uppercase[1:40 + 1]) + ['A' + i for i in string.ascii_uppercase[:15]]
         self.table = []
         self.parse()

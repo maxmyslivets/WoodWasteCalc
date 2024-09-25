@@ -10,7 +10,7 @@ config = Config()
 class Density:
     def __init__(self):
         try:
-            with open(config.settings.density_json_path, 'r', encoding='utf-8') as file:
+            with open(config.taxation_characteristics.density_json_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
                 self.group_of_wood = data.get('group_of_wood', {})
                 self.density_dict = data.get('density_dict', {})

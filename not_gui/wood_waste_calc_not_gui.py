@@ -13,7 +13,7 @@ config = Config()
 
 def main() -> None:
 
-    xls_files = get_files_in_directory(config.settings.xls_directory)
+    xls_files = get_files_in_directory(config.directories.xls_directory)
     for file in xls_files:
         raw_woods = XLSParser().parse(file)
 
