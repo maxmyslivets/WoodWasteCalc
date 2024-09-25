@@ -1,29 +1,20 @@
 import sys
 from pathlib import Path
 
+
 from parsing.config import Config
-from parsing.directory import list_files_in_directory
-from parsing.dxf import dxf_parse
-from xls.xls_write import xls_write
+from parsing.directory import get_files_in_directory
 from parsing.parse_xls import XLSParser, RawWood
 from wood_objects.wood import WoodWaste
+
 
 config = Config()
 
 
 def main() -> None:
 
-    # Парсинг dxf файлов
-    dxf_for_parse = list_files_in_directory(config.settings.parse_dxf_directory)
-    xls_directory = Path(config.settings.parse_xls_directory)
-    xls_titles = ["номер", "порода", "количество", "?диаметр?", "?высота?"]
-    for dxf in dxf_for_parse:
-        data, xls_filename = dxf_parse(dxf)
-        data.insert(0, xls_titles)
-        xls_write(data, xls_directory/(xls_filename+'.xlsx'))
-
-    xls_for_parse = list_files_in_directory(config.settings.parse_xls_directory)
-    for file in xls_for_parse:
+    xls_files = get_files_in_directory(config.settings.xls_directory)
+    for file in xls_files:
         raw_woods = XLSParser().parse(file)
 
         woods = []
