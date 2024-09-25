@@ -46,3 +46,6 @@ def main() -> None:
                                 config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
         WoodWaste.export_to_xls(result_shrub,
                                 config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
+
+        # TODO: В отдельную утилиту сбор всех полученных xls в один файл.
+        #  Каждую группу на отдельный лист, на первом листе суммы по группам и общий итог
