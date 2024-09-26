@@ -26,13 +26,17 @@ def main() -> None:
         try:
             raw_woods = XLSParser().parse(file)
         except Exception as e:
-            print(f"`{file.name}` - Ошибка извлечения данных из таблицы. {e}")
+            print(f"`{file.name}` - Ошибка чтения данных из таблицы. {e}")
             continue
         woods = []
-        for wood_list in raw_woods:
-            raw_wood = RawWood(*wood_list)
-            for wood in raw_wood.parse():
-                woods.append(wood)
+        try:
+            for wood_list in raw_woods:
+                raw_wood = RawWood(*wood_list)
+                for wood in raw_wood.parse():
+                    woods.append(wood)
+        except Exception as e:
+            print(f"`{file.name}` - Ошибка извлечения данных из таблицы. {e}")
+            continue
 
         result_wood = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "плотность", "стволы", "сучья",
                          "пни"]],]

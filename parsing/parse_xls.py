@@ -116,6 +116,9 @@ class RawWood:
             self._diameter = self._diameter.replace(',', '.')
             self._diameter = self._diameter.replace(';', ',')
 
+        self._diameter = self._diameter.replace(',,', ',')
+        self._diameter = self._diameter.replace(',.', ',')
+
         result = []
 
         # Замена кириллического "х" на латинское "x"
@@ -169,6 +172,9 @@ class RawWood:
         if ';' in self._height:
             self._height = self._height.replace(',', '.')
             self._height = self._height.replace(';', ',')
+
+        self._height = self._height.replace(',,', ',')
+        self._height = self._height.replace(',.', ',')
 
         result = []
 
