@@ -46,7 +46,7 @@ class Density:
 
         self.group_of_wood[group].append(specie)
         try:
-            with open(config.settings.density_json_path, 'w', encoding='utf-8') as file:
+            with open(config.taxation_characteristics.density_json_path, 'w', encoding='utf-8') as file:
                 json.dump({
                     'group_of_wood': self.group_of_wood,
                     'density_dict': self.density_dict
