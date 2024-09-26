@@ -11,9 +11,9 @@ class Trunk:
     """
     volume: float
 
-    def __init__(self, diameter: int, height: int) -> None:
-        self.diameter = diameter
-        self.height = height
+    def __init__(self, diameter: float, height: float) -> None:
+        self.diameter = int(diameter) if diameter-int(diameter) == 0 else diameter
+        self.height = int(height) if height-int(height) == 0 else height
 
     def __repr__(self) -> str:
         return f"Диаметр {self.diameter} см, высота {self.height} м"
@@ -61,7 +61,7 @@ class WoodWaste(Wood):
         # нахождение объёмов
         volume = Volume()
         for trunk in self.trunks:
-            trunk.volume = volume.get_volume(trunk.diameter, trunk.height)
+            trunk.volume = volume.get_volume(int(trunk.diameter), int(trunk.height))
         # перемещение ствола с наибольшим объёмом в начало списка
         max_trunk = max(self.trunks, key=lambda t: t.volume)
         self.trunks.remove(max_trunk)
