@@ -53,12 +53,17 @@ class RawWood:
             if '-' in part:
                 start, end = part.split('-')
                 try:
-                    start = int(start)
-                    end = int(end)
-                except ValueError as e:
-                    start = start.split('.')[1]
-                    end = end.split('.')[1]
-                result.extend([str(_) for _ in range(int(start), int(end) + 1)])
+                    try:
+                        start = int(start)
+                        end = int(end)
+                    except ValueError as e:
+                        start = start.split('.')[1]
+                        end = end.split('.')[1]
+                    result.extend([str(_) for _ in range(int(start), int(end) + 1)])
+                # WARNING опасный костыль !!!!!!!!!!!!!!!
+                # работает только для номеров типа `32 -32а`, где подразумевается только два номера
+                except AttributeError as e:
+                    result.extend([start, end])
             else:
                 result.append(part)
         self.number = result
