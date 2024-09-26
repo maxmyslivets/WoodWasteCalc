@@ -23,7 +23,11 @@ def main() -> None:
 
     # обработка таблиц
     for file in xls_files_valid:
-        raw_woods = XLSParser().parse(file)
+        try:
+            raw_woods = XLSParser().parse(file)
+        except Exception as e:
+            print(f"`{file.name}` - Ошибка извлечения данных из таблицы. {e}")
+            continue
         woods = []
         for wood_list in raw_woods:
             raw_wood = RawWood(*wood_list)

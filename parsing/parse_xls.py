@@ -264,7 +264,7 @@ class XLSParser:
             config.table_structure.height
         ]
 
-    def parse(self, filepath: Path) -> list:     # TODO: Try-Except
+    def parse(self, filepath: Path) -> list:
         """
         Парсинг excel файла. Получение двумерного массива данных таблицы.
         :param filepath: путь до файла
