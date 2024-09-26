@@ -1,5 +1,6 @@
 from parsing.config import Config
 from parsing.directory import get_files_in_directory
+from validation.validation import ValidXLS
 from parsing.parse_xls import XLSParser, RawWood
 from wood_objects.wood import WoodWaste
 
@@ -10,6 +11,14 @@ config = Config()
 def main() -> None:
 
     xls_files = get_files_in_directory(config.directories.xls_directory)
+
+    # валидация таблиц
+    for file in xls_files:
+        valid_xls = ValidXLS(file)
+        is_valid = valid_xls.check_valid()
+        if not is_valid:
+            print(f"Файл `{file.name}` имеет нераспознанные данные и не будет обработан")
+
     for file in xls_files:
         raw_woods = XLSParser().parse(file)
 

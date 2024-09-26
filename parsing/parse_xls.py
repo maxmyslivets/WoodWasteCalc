@@ -67,10 +67,6 @@ class RawWood:
         # Название породы
         specie = self._name.split()[0].lower()
 
-        # Проверка наличия породы в списке известных
-        if specie not in shrub_species and specie not in wood_species:
-            raise UnknownSpecie("Неизвестная порода")
-
         # Определение: кустарник или дерево
         if specie in shrub_species or "(поросль)" in self._name:
             is_shrub = True

@@ -67,15 +67,7 @@ class WoodWaste(Wood):
         self.trunks.remove(max_trunk)
         self.trunks.insert(0, max_trunk)
         # определение плотности породы
-        try:
-            self.density = Density().get_density(self.specie)
-        except UnknownSpecie as e:
-            print(e)
-            group = int(input(f"К какой группе плотности относится пород '{self.specie}'?\n"
-                              f"1-мягкие, 2-твердые, 3-лиственница. Введите цифру: "))  # TODO: try-except
-            group_name = {1: "мягкие", 2: "твердые", 3: "лиственница"}[group]
-            Density().add_specie_to_group(group_name, self.specie)
-            self.density = Density().get_density(self.specie)
+        self.density = Density().get_density(self.specie)
 
     def export_preparation(self) -> None:
         self.data = []
