@@ -15,7 +15,7 @@ class Density:
                 self.group_of_wood = data.get('group_of_wood', {})
                 self.density_dict = data.get('density_dict', {})
         except Exception as e:
-            print("Ошибка чтения файла density.json", e)    # TODO: добавить Exception
+            print("Ошибка чтения файла density.json", e)
 
     def get_density(self, specie: str) -> int:
         """
