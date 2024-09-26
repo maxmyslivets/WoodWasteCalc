@@ -11,6 +11,7 @@ config = Config()
 def main() -> None:
 
     xls_files = get_files_in_directory(config.directories.xls_directory)
+    xls_files_valid = xls_files.copy()
 
     # валидация таблиц
     for file in xls_files:
@@ -18,26 +19,16 @@ def main() -> None:
         is_valid = valid_xls.check_valid()
         if not is_valid:
             print(f"Файл `{file.name}` имеет нераспознанные данные и не будет обработан")
+            xls_files_valid.remove(file)
 
-    for file in xls_files:
+    # обработка таблиц
+    for file in xls_files_valid:
         raw_woods = XLSParser().parse(file)
-
         woods = []
-        validate = True
-        # Парсинг таблиц
         for wood_list in raw_woods:
             raw_wood = RawWood(*wood_list)
-            try:
-                if raw_wood.is_valid():
-                    for wood in raw_wood.parse():
-                        woods.append(wood)
-            except Exception as e:
-                validate = False
-                print(e)
-
-        if not validate:
-            print(f"Файл `{file.name}` имеет нераспознанные данные и не будет обработан")
-            continue
+            for wood in raw_wood.parse():
+                woods.append(wood)
 
         result_wood = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "плотность", "стволы", "сучья",
                          "пни"]],]

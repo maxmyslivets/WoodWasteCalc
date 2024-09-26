@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from errors.parse_errors import ParseQuantityError
 from parsing.config import Config
 from parsing.parse_xls import XLSParser, RawWood
 from parsing.species_db import read_species_from_json
@@ -29,31 +30,85 @@ class ValidXLS:
 
     def check_valid(self) -> bool:
 
+        print(f"Валидация файла `{self.file.name}` ...")
+
         is_valid = True
 
         table = XLSParser().parse(self.file)
-        woods = []
+
+        species = []
         for row in table:
-            woods.append(RawWood(*row))
+            species.append(row[1].split()[0].lower())
 
         # обнаружение неизвестных пород
         unknown_specie = []
-        for wood in woods:
-            specie = wood._name.split()[0].lower()
+        for specie in species:
             if not self.check_specie(specie) and specie not in unknown_specie:
                 unknown_specie.append(specie)
         if len(unknown_specie) != 0:
-            print(f"В файле `{self.file.name}` обнаружены неизвестные породы: {unknown_specie}")
+            print(f"`{self.file.name}` - Обнаружены неизвестные породы: {unknown_specie}")
             is_valid = False
 
         # обнаружение пород с неизвестной плотностью древесины
         unknown_density = []
-        for wood in woods:
-            specie = wood._name.split()[0].lower()
+        for specie in species:
             if not self.check_density(specie) and specie not in unknown_density:
                 unknown_density.append(specie)
         if len(unknown_density) != 0:
-            print(f"В файле `{self.file.name}` обнаружены породы с неизвестной плотностью древесины: {unknown_density}")
+            print(f"`{self.file.name}` - Обнаружены породы с неизвестной плотностью древесины: {unknown_density}")
             is_valid = False
+
+        for row in table:
+            raw_wood = RawWood(*row)
+
+            # парсинг номера
+            try:
+                raw_wood._parse_number()
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения списка номеров. {e}")
+                is_valid = False
+
+            # парсинг породы
+            try:
+                raw_wood._parse_specie()
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения породы. {e}")
+                is_valid = False
+
+            # парсинг количества
+            try:
+                raw_wood._parse_quantity()
+                try:
+                    if raw_wood.quantity_is_area and len(raw_wood.number) > 1:
+                        raise ParseQuantityError(f"Количество номеров превышает 1 для площади.")
+                except AttributeError:
+                    # print(f"`{self.file.name}` [{raw_wood}] - Невозможно произвести проверку "
+                    #       f"из-за ошибки в извлечении списка номеров")
+                    is_valid = False
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения количества/площади. {e}")
+                is_valid = False
+
+            # парсинг диаметра
+            try:
+                raw_wood._parse_diameter()
+            except AttributeError as e:
+                # print(f"`{self.file.name}` [{raw_wood}] - Невозможно произвести проверку "
+                #       f"из-за ошибки в извлечении предыдущих данных. {e}")
+                is_valid = False
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения диаметра. {e}")
+                is_valid = False
+
+            # парсинг высоты
+            try:
+                raw_wood._parse_height()
+            except AttributeError as e:
+                # print(f"`{self.file.name}` [{raw_wood}] - Невозможно произвести проверку "
+                #       f"из-за ошибки в извлечении предыдущих данных. {e}")
+                is_valid = False
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения высоты. {e}")
+                is_valid = False
 
         return is_valid

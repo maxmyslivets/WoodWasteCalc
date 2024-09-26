@@ -28,15 +28,20 @@ class RawWood:
         self._height = height
 
         # дополнительные переменные
-        self.specie: str  # порода
-        self.is_shrub: bool  # кустарник
-        self.trunk_count: int  # количество стволов
+        self.number: list[str]
+        self.specie: str
+        self.is_shrub: bool
+        self.trunk_count: int
+        self.quantity: int
+        self.diameter: list[float]
+        self.height: list[float]
+        self.quantity_is_area: bool
 
     def __repr__(self) -> str:
         return f"'{self._number}'\t'{self._name}'\t'{self._quantity}'\t" \
                f"'{self._diameter}'\t'{self._height}'"
 
-    def _parse_number(self) -> list[str]:
+    def _parse_number(self) -> None:
         """
         Форматирование номера дерева или деревьев в таблице.
         :return: Список номеров деревьев
@@ -56,60 +61,51 @@ class RawWood:
                 result.extend([str(_) for _ in range(int(start), int(end) + 1)])
             else:
                 result.append(part)
-        return result
+        self.number = result
 
-    def _parse_specie(self) -> dict:
+    def _parse_specie(self) -> None:
         """
         Парсинг строки наименования породы.
         :return: словарь значений {порода: str, кустарник: bool, количество стволов: int}
         """
 
         # Название породы
-        specie = self._name.split()[0].lower()
+        self.specie = self._name.split()[0].lower()
 
         # Определение: кустарник или дерево
-        if specie in shrub_species or "(поросль)" in self._name:
-            is_shrub = True
-        elif specie in wood_species and "(поросль)" not in self._name:
-            is_shrub = False
+        if self.specie in shrub_species or "(поросль)" in self._name:
+            self.is_shrub = True
+        elif self.specie in wood_species and "(поросль)" not in self._name:
+            self.is_shrub = False
         else:
             raise ParseSpecieError("Не удалось определить кустарник или дерево")
 
         # Определение количества стволов
         match = re.search(r'(\d+)\s*ствол', self._name, re.IGNORECASE)
-        # trunk_count = int(match.group(1)) if match else len(self._parse_number())
-        trunk_count = int(match.group(1)) if match else 1
+        self.trunk_count = int(match.group(1)) if match else 1
 
-        return {"specie": specie, "is_shrub": is_shrub, "trunk_count": trunk_count}
-
-    def _parse_quantity(self) -> (int, bool):
+    def _parse_quantity(self) -> None:
         """
         Определение количества деревьев или площади поросли.
         :return: (число: int, площадь: bool)
         """
 
-        is_area = "м" in self._quantity
+        self.quantity_is_area = "м" in self._quantity
 
         quantity_match = re.search(r'\d+', self._quantity)
-        # print(quantity_match)
-        try:
-            quantity = int(quantity_match.group(0))
-        except Exception as e:
-            raise ParseQuantityError(f"Ошибка в извлечении количества деревьев или площади.\n{e}")
+        self.quantity = int(quantity_match.group(0))
 
-        if is_area and len(self._parse_number()) > 1:
-            raise ParseQuantityError(f"Ошибка в извлечении количества деревьев или площади.")
-
-        return quantity, is_area
-
-    def _parse_diameter(self) -> list[float]:
+    def _parse_diameter(self) -> None:
         """
         Форматирование списка диаметров
         :return: список диаметров
         """
 
-        if self._parse_quantity()[0] == 1 and self._diameter.count(",") == 1 and self._parse_specie()["trunk_count"] == 1:
-            return [float(self._diameter.replace(',', '.'))]
+        self._diameter = self._diameter.replace(' ', ',')
+
+        if self.quantity == 1 and self._diameter.count(",") == 1 and self.trunk_count == 1:
+            self.diameter = [float(self._diameter.replace(',', '.'))]
+            return
 
         if ';' in self._diameter:
             self._diameter = self._diameter.replace(',', '.')
@@ -117,53 +113,53 @@ class RawWood:
 
         result = []
 
-        try:
-            # Замена кириллического "х" на латинское "x"
-            diameters = self._diameter.replace("х", "x").replace("Х", "x")
+        # Замена кириллического "х" на латинское "x"
+        diameters = self._diameter.replace("х", "x").replace("Х", "x")
 
-            # Разделение строки по запятым
-            parts = diameters.split(',')
-            for part in parts:
-                part = part.strip()
-                # Поиск шаблона "числоxчисло"
-                match = re.match(r'(\d+(\.\d+)?)x(\d+)', part)
+        # Разделение строки по запятым
+        parts = diameters.split(',')
 
-                if match:
-                    # Если найдено, распаковываем значения
-                    num, _, repeat = match.groups()
-                    result.extend([float(num)] * int(repeat))
-                elif part.isdigit() or re.match(r'^\d+(\.\d+)?$', part):
-                    # Если часть является числом, добавляем его в результат
-                    result.append(float(part))
-                elif part == "-":
-                    # Специальный случай для "-"
-                    result.append(2.0)
+        for part in parts:
+            part = part.strip()
+            # Поиск шаблона "числоxчисло"
+            match = re.match(r'(\d+(\.\d+)?)x(\d+)', part)
+            if match:
+                # Если найдено, распаковываем значения
+                num, _, repeat = match.groups()
+                result.extend([float(num)] * int(repeat))
+            elif part.isdigit() or re.match(r'^\d+(\.\d+)?$', part):
+                # Если часть является числом, добавляем его в результат
+                result.append(float(part))
+            elif part == "-":
+                # Специальный случай для "-"
+                result.append(2.0)
 
-            number_count = len(self._parse_number())
-            specie = self._parse_specie()
-            is_area = self._parse_quantity()[1]
-            if len(result) < number_count:
-                if len(result) == 1 and not specie["is_shrub"]:
-                    result *= number_count
+        if len(result) < len(self.number):
+            if len(result) == 1 and not self.is_shrub:
+                result *= len(self.number)
+            else:
+                raise ParseDiameterError(f"Диаметров меньше чем номеров")
+        if len(result) > len(self.number) and not self.quantity_is_area:
+            if not self.trunk_count > len(self.number) == 1:
+                if len(self.number) == 1 and len(self.number[0]) == len(self._number):
+                    self.number *= len(result)
                 else:
-                    raise ParseDiameterError(f"Ошибка парсинга строки диаметров стволов. Диаметров меньше чем номеров")
-            if len(result) > number_count and not is_area:
-                if not specie["trunk_count"] > number_count == 1:
-                    raise ParseDiameterError(f"Ошибка парсинга строки диаметров стволов. Диаметров больше чем номеров")
+                    raise ParseDiameterError(f"Диаметров больше чем номеров")
 
-        except Exception as e:
-            raise ParseDiameterError(f"Ошибка парсинга строки диаметров стволов.\n{e}")
+        self.diameter = result
 
-        return result
-
-    def _parse_height(self) -> list[float]:
+    def _parse_height(self) -> None:
         """
         Форматирование списка высот
         :return: список высот
         """
 
-        if self._parse_quantity()[0] == 1 and self._height.count(",") == 1 and self._parse_specie()["trunk_count"] == 1:
-            return [float(self._height.replace(',', '.'))]
+        if "свыше" not in self._height and "ниже" not in self._height:
+            self._height = self._height.replace(' ', ',')
+
+        if self.quantity == 1 and self._height.count(",") == 1 and self.trunk_count == 1:
+            self.height = [float(self._height.replace(',', '.'))]
+            return
 
         if ';' in self._height:
             self._height = self._height.replace(',', '.')
@@ -171,92 +167,48 @@ class RawWood:
 
         result = []
 
-        try:
-            # Замена кириллического "х" на латинское "x"
-            heights = self._height.replace("х", "x").replace("Х", "x")
+        # Замена кириллического "х" на латинское "x"
+        heights = self._height.replace("х", "x").replace("Х", "x")
 
-            # Разделение строки по запятым
-            parts = heights.split(',')
+        # Разделение строки по запятым
+        parts = heights.split(',')
 
-            for part in parts:
-                part = part.strip().lower()
-                # Поиск шаблона "числоxчисло"
-                match = re.match(r'(\d+(\.\d+)?)x(\d+)', part)
+        for part in parts:
+            part = part.strip().lower()
+            # Поиск шаблона "числоxчисло"
+            match = re.match(r'(\d+(\.\d+)?)x(\d+)', part)
+            if match:
+                # Если найдено, распаковываем значения
+                num, _, repeat = match.groups()
+                result.extend([float(num)] * int(repeat))
+            elif part.isdigit() or re.match(r'^\d+(\.\d+)?$', part):
+                # Если часть является числом, добавляем его в результат
+                result.append(float(part))
+            elif "свыше" in part:
+                # Обработка случая "свыше Xм"
+                number_match = re.search(r'\d+', part)
+                if number_match:
+                    result.append(float(number_match.group()) + 0.5)
+            elif "ниже" in part:
+                # Обработка случая "ниже Xм"
+                number_match = re.search(r'\d+', part)
+                if number_match:
+                    h = float(number_match.group())
+                    result.append(h - 0.5 if h > 0.5 else h)
 
-                if match:
-                    # Если найдено, распаковываем значения
-                    num, _, repeat = match.groups()
-                    result.extend([float(num)] * int(repeat))
-                elif part.isdigit() or re.match(r'^\d+(\.\d+)?$', part):
-                    # Если часть является числом, добавляем его в результат
-                    result.append(float(part))
-                elif "свыше" in part:
-                    # Обработка случая "свыше Xм"
-                    number_match = re.search(r'\d+', part)
-                    if number_match:
-                        result.append(float(number_match.group()) + 0.5)
-                elif "ниже" in part:
-                    # Обработка случая "ниже Xм"
-                    number_match = re.search(r'\d+', part)
-                    if number_match:
-                        h = float(number_match.group())
-                        result.append(h - 0.5 if h > 0.5 else h)
-
-            number_count = len(self._parse_number())
-            specie = self._parse_specie()
-            is_area = self._parse_quantity()[1]
-            if len(result) < number_count:
-                if len(result) == 1 and not specie["is_shrub"]:
-                    result *= number_count
+        if len(result) < len(self.number):
+            if len(result) == 1 and not self.is_shrub:
+                result *= len(self.number)
+            else:
+                raise ParseDiameterError(f"Высот меньше чем номеров")
+        if len(result) > len(self.number) and not self.quantity_is_area:
+            if not self.trunk_count > len(self.number) == 1:
+                if len(self.number) == 1 and len(self.number[0]) == len(self._number):
+                    self.number *= len(result)
                 else:
-                    raise ParseDiameterError(f"Ошибка парсинга строки высот стволов. Высот меньше чем стволов")
-            if len(result) > number_count and not is_area:
-                if not specie["trunk_count"] > number_count == 1:
-                    raise ParseDiameterError(f"Ошибка парсинга строки высот стволов. Высот больше чем номеров")
+                    raise ParseDiameterError(f"Высот больше чем номеров")
 
-        except Exception as e:
-            raise ParseHeightError(f"Ошибка парсинга строки высот стволов.\n{e}")
-
-        return result
-
-    def is_valid(self) -> None:
-        """
-        Валидация данных в строке
-        :return:
-        """
-        valid = True
-        try:
-            # проверка парсинга
-            number = self._parse_number()
-            specie = self._parse_specie()
-            quantity = self._parse_quantity()
-            diameter = self._parse_diameter()
-            height = self._parse_height()
-
-            valid_list = {
-                1: ("Ошибка проверки соответствия кустарнику по породе и количеству",
-                    not (not specie["is_shrub"] and quantity[1])),
-                # 2: ("Ошибка проверки равенства количества номеров и деревьев",
-                #     len(number) == quantity[0] and not quantity[1]),
-                3: ("Ошибка проверки количества номеров для кустарника с одной площадью",
-                    not (len(number) > 1 and quantity[1]))
-            }
-
-            errors = []
-
-            for error, valid_ in valid_list.values():
-                if not valid_:
-                    valid = False
-                    errors.append(error)
-
-            if errors:
-                error = '\n'.join([_ for _ in errors])
-                raise ValidError(f"Ошибка валидации в строке: {self.__repr__()}\n{error}")
-
-        except Exception as e:
-            raise ValidError(f"Ошибка валидации в строке: {self.__repr__()}\n{e}")
-
-        return valid    # FIXME: Expected type 'None', got 'bool' instead
+        self.height = result
 
     def parse(self) -> list[Wood]:
         """
@@ -264,30 +216,27 @@ class RawWood:
         :return:
         """
 
+        self._parse_number()
+        self._parse_specie()
+        self._parse_quantity()
+        self._parse_diameter()
+        self._parse_height()
+
         woods = []
 
-        number = self._parse_number()
-        specie_dict = self._parse_specie()
-        specie, is_shrub, trunk_count = specie_dict["specie"], specie_dict["is_shrub"], specie_dict["trunk_count"]
-        quantity, is_area = self._parse_quantity()
-        diameter = self._parse_diameter()
-        height = self._parse_height()
-        area = quantity if is_area else None
-
         try:
-            for idx_wood in range(len(number)):
+            for idx_wood in range(len(self.number)):
                 trunks = []
-                if trunk_count > 1:
-                    for idx_trunk in range(trunk_count):
-                        # FIXME: Expected type 'int', got 'float' instead
-                        trunks.append(Trunk(diameter=diameter[idx_trunk], height=height[idx_trunk]))
-                    woods.append(Wood(name=self._name, number=number[idx_wood], specie=specie, is_shrub=is_shrub,
-                                      trunks=trunks))
+                if self.trunk_count > 1:
+                    for idx_trunk in range(self.trunk_count):
+                        trunks.append(Trunk(diameter=self.diameter[idx_trunk], height=self.height[idx_trunk]))
+                    woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
+                                      is_shrub=self.is_shrub, trunks=trunks))
                 else:
-                    # FIXME: Expected type 'int', got 'float' instead
-                    trunks.append(Trunk(diameter=diameter[idx_wood], height=height[idx_wood]))
-                    woods.append(Wood(name=self._name, number=number[idx_wood], specie=specie, is_shrub=is_shrub,
-                                      trunks=trunks, area=area))
+                    trunks.append(Trunk(diameter=self.diameter[idx_wood], height=self.height[idx_wood]))
+                    woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
+                                      is_shrub=self.is_shrub, trunks=trunks,
+                                      area=self.quantity if self.quantity_is_area else None))
         except Exception as e:
             raise ParseError(f"Ошибка получения объекта дерева {self.__repr__()}. {e}")
 
