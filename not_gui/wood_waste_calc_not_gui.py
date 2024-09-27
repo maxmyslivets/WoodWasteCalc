@@ -50,10 +50,9 @@ def main() -> None:
             else:
                 result_wood.append(w.data)
 
-        WoodWaste.export_to_xls(result_wood,
-                                config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
-        WoodWaste.export_to_xls(result_shrub,
-                                config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
-
-        # TODO: В отдельную утилиту сбор всех полученных xls в один файл.
-        #  Каждую группу на отдельный лист, на первом листе суммы по группам и общий итог
+        if len(result_wood) > 1:
+            WoodWaste.export_to_xls(result_wood,
+                                    config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
+        if len(result_shrub) > 1:
+            WoodWaste.export_to_xls(result_shrub,
+                                    config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
