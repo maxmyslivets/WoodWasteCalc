@@ -17,10 +17,17 @@ shrub_species, wood_species = read_species_from_json(config.taxation_characteris
 
 class RawWood:
     """
-    Класс для создания списка деревьев из сырой строки.
+    Класс для обработки данных о дереве из xls файла
     """
 
     def __init__(self, number: str, name: str, quantity: str, diameter: str, height: str) -> None:
+        """
+        :param number: Номер дерева
+        :param name: Название дерева
+        :param quantity: Количество деревьев или стволов
+        :param diameter: Диаметр дерева
+        :param height: Высота дерева
+        """
         self._number = number
         self._name = name
         self._quantity = quantity
@@ -43,8 +50,7 @@ class RawWood:
 
     def _parse_number(self) -> None:
         """
-        Форматирование номера дерева или деревьев в таблице.
-        :return: Список номеров деревьев
+        Форматирование номера дерева или деревьев в таблице
         """
         result = []
         parts = self._number.translate({ord(c): None for c in string.whitespace}).split(',')
@@ -70,8 +76,7 @@ class RawWood:
 
     def _parse_specie(self) -> None:
         """
-        Парсинг строки наименования породы.
-        :return: словарь значений {порода: str, кустарник: bool, количество стволов: int}
+        Парсинг строки наименования породы
         """
 
         # Название породы
@@ -91,8 +96,7 @@ class RawWood:
 
     def _parse_quantity(self) -> None:
         """
-        Определение количества деревьев или площади поросли.
-        :return: (число: int, площадь: bool)
+        Определение количества деревьев или площади поросли
         """
 
         self.quantity_is_area = "м" in self._quantity
@@ -103,7 +107,6 @@ class RawWood:
     def _parse_diameter(self) -> None:
         """
         Форматирование списка диаметров
-        :return: список диаметров
         """
 
         self._diameter = self._diameter.replace(' ', ',')
@@ -159,7 +162,6 @@ class RawWood:
     def _parse_height(self) -> None:
         """
         Форматирование списка высот
-        :return: список высот
         """
 
         if "свыше" not in self._height and "ниже" not in self._height:
@@ -256,7 +258,7 @@ class RawWood:
 
 class XLSParser:
     """
-    Класс для чтения excel файлов.
+    Класс для чтения excel файлов
 
     1 строка входного файла должна представлять заголовки таблицы.
     """
@@ -273,8 +275,8 @@ class XLSParser:
     def parse(self, filepath: Path) -> list:
         """
         Парсинг excel файла. Получение двумерного массива данных таблицы.
-        :param filepath: путь до файла
-        :return: двумерный массив (list)
+        :param filepath: Путь до файла XLS
+        :return: двумерный массив данных таблицы
         """
         # Чтение исходного файла Excel
         wb = load_workbook(filepath)

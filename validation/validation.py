@@ -11,7 +11,13 @@ config = Config()
 
 
 class ValidXLS:
+    """
+    Класс для проверки XLS файла на корректность
+    """
     def __init__(self, filepath: Path) -> None:
+        """
+        :param filepath: путь к файлу XLS
+        """
         self.file = filepath
         self.shrub_species, self.wood_species = read_species_from_json(
             config.taxation_characteristics.species_json_path)
@@ -23,12 +29,23 @@ class ValidXLS:
                 self.density_species.extend(species)
 
     def check_specie(self, specie: str) -> bool:
+        """
+        Проверка существования породы в файле species.json
+        :param specie: название породы
+        """
         return False if specie not in self.shrub_species and specie not in self.wood_species else True
 
     def check_density(self, specie: str) -> bool:
+        """
+        Проверка существования породы в файле densities.json
+        :param specie: название породы
+        """
         return False if specie not in self.density_species else True
 
     def check_valid(self) -> bool:
+        """
+        Проверка на корректность данный в файле XLS
+        """
 
         print(f"Валидация файла `{self.file.name}` ...")
 
