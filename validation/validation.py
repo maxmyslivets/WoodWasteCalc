@@ -129,8 +129,11 @@ class ValidXLS:
                 is_valid = False
 
             # сравнение количества диаметров и высот
-            if len(raw_wood.height) != len(raw_wood.diameter) and '-' not in raw_wood._diameter:
-                print(f"`{self.file.name}` [{raw_wood}] - Неравное количество диаметров и высот.")
+            try:
+                if len(raw_wood.height) != len(raw_wood.diameter) and '-' not in raw_wood._diameter:
+                    print(f"`{self.file.name}` [{raw_wood}] - Неравное количество диаметров и высот.")
+                    is_valid = False
+            except Exception as e:
                 is_valid = False
 
         return is_valid
