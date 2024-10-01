@@ -1,4 +1,4 @@
-from parsing.config import Config
+from config.config import Config
 
 GUI = Config().gui.gui
 

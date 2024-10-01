@@ -3,16 +3,16 @@ import re
 from pathlib import Path
 from openpyxl import load_workbook
 
-from wood_objects.wood import Wood, Trunk
+from wood.wood import Wood, Trunk
 from errors.parse_errors import *
 
-from .config import Config
+from config.config import Config
 
 config = Config()
 
-from .species_db import read_species_from_json
+from taxation.species_db import Species
 
-shrub_species, wood_species = read_species_from_json(config.taxation_characteristics.species_json_path)
+shrub_species, wood_species = Species().get_species()
 
 
 class RawWood:
@@ -48,7 +48,7 @@ class RawWood:
         return f"'{self._number}'\t'{self._name}'\t'{self._quantity}'\t" \
                f"'{self._diameter}'\t'{self._height}'"
 
-    def _parse_number(self) -> None:
+    def parse_number(self) -> None:
         """
         Форматирование номера дерева или деревьев в таблице
         """
@@ -74,7 +74,7 @@ class RawWood:
                 result.append(part)
         self.number = result
 
-    def _parse_specie(self) -> None:
+    def parse_specie(self) -> None:
         """
         Парсинг строки наименования породы
         """
@@ -94,7 +94,7 @@ class RawWood:
         match = re.search(r'(\d+)\s*ствол', self._name, re.IGNORECASE)
         self.trunk_count = int(match.group(1)) if match else 1
 
-    def _parse_quantity(self) -> None:
+    def parse_quantity(self) -> None:
         """
         Определение количества деревьев или площади поросли
         """
@@ -104,7 +104,7 @@ class RawWood:
         quantity_match = re.search(r'\d+', self._quantity)
         self.quantity = int(quantity_match.group(0))
 
-    def _parse_diameter(self) -> None:
+    def parse_diameter(self) -> None:
         """
         Форматирование списка диаметров
         """
@@ -159,7 +159,7 @@ class RawWood:
 
         self.diameter = result
 
-    def _parse_height(self) -> None:
+    def parse_height(self) -> None:
         """
         Форматирование списка высот
         """
@@ -229,11 +229,11 @@ class RawWood:
         :return:
         """
 
-        self._parse_number()
-        self._parse_specie()
-        self._parse_quantity()
-        self._parse_diameter()
-        self._parse_height()
+        self.parse_number()
+        self.parse_specie()
+        self.parse_quantity()
+        self.parse_diameter()
+        self.parse_height()
 
         woods = []
 
@@ -256,7 +256,7 @@ class RawWood:
         return woods
 
 
-class XLSParser:
+class XLSWoodParser:
     """
     Класс для чтения excel файлов
 

@@ -6,8 +6,7 @@ from pathlib import Path
 
 from openpyxl.utils import get_column_letter
 
-from parsing.config import Config
-from parsing.directory import get_files_in_directory
+from config.config import Config
 
 
 config = Config()
@@ -30,7 +29,7 @@ class XLSConnection:
     """
     def __init__(self, directory: Path) -> None:
         self.directory = directory
-        self.files = get_files_in_directory(directory)
+        self.files = [file for file in self.directory.iterdir() if file.is_file()]
 
     def create_out_xlsx(self) -> None:
         """

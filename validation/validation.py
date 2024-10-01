@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 
 from errors.parse_errors import ParseQuantityError
-from parsing.config import Config
-from parsing.parse_xls import XLSParser, RawWood
-from parsing.species_db import read_species_from_json
+from config.config import Config
+from parsing.parse_xls import XLSWoodParser, RawWood
+from taxation.species_db import Species
 
 
 config = Config()
@@ -19,8 +19,7 @@ class ValidXLS:
         :param filepath: путь к файлу XLS
         """
         self.file = filepath
-        self.shrub_species, self.wood_species = read_species_from_json(
-            config.taxation_characteristics.species_json_path)
+        self.shrub_species, self.wood_species = Species().get_species()
         with (open(config.taxation_characteristics.density_json_path, 'r', encoding='utf-8') as file):
             data = json.load(file)
             group_of_wood = data.get('group_of_wood', {})
@@ -51,7 +50,7 @@ class ValidXLS:
 
         is_valid = True
 
-        table = XLSParser().parse(self.file)
+        table = XLSWoodParser().parse(self.file)
 
         species = []
         for row in table:
@@ -80,21 +79,21 @@ class ValidXLS:
 
             # парсинг номера
             try:
-                raw_wood._parse_number()
+                raw_wood.parse_number()
             except Exception as e:
                 print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения списка номеров. {e}")
                 is_valid = False
 
             # парсинг породы
             try:
-                raw_wood._parse_specie()
+                raw_wood.parse_specie()
             except Exception as e:
                 print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения породы. {e}")
                 is_valid = False
 
             # парсинг количества
             try:
-                raw_wood._parse_quantity()
+                raw_wood.parse_quantity()
                 try:
                     if raw_wood.quantity_is_area and len(raw_wood.number) > 1:
                         raise ParseQuantityError(f"Количество номеров превышает 1 для площади.")
@@ -108,7 +107,7 @@ class ValidXLS:
 
             # парсинг диаметра
             try:
-                raw_wood._parse_diameter()
+                raw_wood.parse_diameter()
             except AttributeError as e:
                 # print(f"`{self.file.name}` [{raw_wood}] - Невозможно произвести проверку "
                 #       f"из-за ошибки в извлечении предыдущих данных. {e}")
@@ -119,7 +118,7 @@ class ValidXLS:
 
             # парсинг высоты
             try:
-                raw_wood._parse_height()
+                raw_wood.parse_height()
             except AttributeError as e:
                 # print(f"`{self.file.name}` [{raw_wood}] - Невозможно произвести проверку "
                 #       f"из-за ошибки в извлечении предыдущих данных. {e}")

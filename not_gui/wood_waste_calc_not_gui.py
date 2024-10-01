@@ -1,8 +1,7 @@
-from parsing.config import Config
-from parsing.directory import get_files_in_directory
+from config.config import Config
 from validation.validation import ValidXLS
-from parsing.parse_xls import XLSParser, RawWood
-from wood_objects.wood import WoodWaste
+from parsing.parse_xls import XLSWoodParser, RawWood
+from calculation.waste import WasteCalculation
 
 
 config = Config()
@@ -10,7 +9,7 @@ config = Config()
 
 def main() -> None:
 
-    xls_files = get_files_in_directory(config.directories.xls_directory)
+    xls_files = [file for file in config.directories.xls_directory.iterdir() if file.is_file()]
     xls_files_valid = xls_files.copy()
 
     # валидация таблиц
@@ -24,7 +23,7 @@ def main() -> None:
     # обработка таблиц
     for file in xls_files_valid:
         try:
-            raw_woods = XLSParser().parse(file)
+            raw_woods = XLSWoodParser().parse(file)
         except Exception as e:
             print(f"`{file.name}` - Ошибка чтения данных из таблицы. {e}")
             continue
@@ -43,7 +42,7 @@ def main() -> None:
         result_shrub = [[["номер", "порода", "количество", "диаметр", "высота", "объем", "площадь", "плотность",
                           "сучья", "пни"]],]
         for wood in woods:
-            w = WoodWaste(wood.name, wood.number, wood.specie, wood.is_shrub, wood.trunks, wood.area)
+            w = WasteCalculation(wood.name, wood.number, wood.specie, wood.is_shrub, wood.trunks, wood.area)
             w.export_preparation()
             if w.is_shrub:
                 result_shrub.append(w.data)
@@ -51,8 +50,8 @@ def main() -> None:
                 result_wood.append(w.data)
 
         if len(result_wood) > 1:
-            WoodWaste.export_to_xls(result_wood,
-                                    config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
+            WasteCalculation.export_to_xls(result_wood,
+                                           config.directories.out_directory / f"{file.stem}_out_wood{file.suffix}")
         if len(result_shrub) > 1:
-            WoodWaste.export_to_xls(result_shrub,
-                                    config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
+            WasteCalculation.export_to_xls(result_shrub,
+                                           config.directories.out_directory / f"{file.stem}_out_shrub{file.suffix}")
