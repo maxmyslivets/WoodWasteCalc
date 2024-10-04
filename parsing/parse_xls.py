@@ -163,8 +163,8 @@ class RawWood:
         """
         Форматирование списка высот
         """
-
-        if "свыше" not in self._height and "ниже" not in self._height:
+        # FIXME ошибка при "0.5м"
+        if "свыше" not in self._height and "ниже" not in self._height:      # TODO добавить "до"
             self._height = self._height.replace(' ', ',')
 
         if self.quantity == 1 and self._height.count(",") == 1 and self.trunk_count == 1:
