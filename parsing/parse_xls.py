@@ -163,8 +163,7 @@ class RawWood:
         """
         Форматирование списка высот
         """
-        # FIXME ошибка при "0.5м"
-        if "свыше" not in self._height and "ниже" not in self._height:      # TODO добавить "до"
+        if all(word not in self._height for word in ["выше", "ниже", "до", "от"]):
             self._height = self._height.replace(' ', ',')
 
         if self.quantity == 1 and self._height.count(",") == 1 and self.trunk_count == 1:
@@ -197,12 +196,12 @@ class RawWood:
             elif part.isdigit() or re.match(r'^\d+(\.\d+)?$', part):
                 # Если часть является числом, добавляем его в результат
                 result.append(float(part))
-            elif "свыше" in part:
+            elif "свыше" in part or "от" in part:
                 # Обработка случая "свыше Xм"
                 number_match = re.search(r'\d+', part)
                 if number_match:
                     result.append(float(number_match.group()) + 0.5)
-            elif "ниже" in part:
+            elif "ниже" in part or "до" in part:
                 # Обработка случая "ниже Xм"
                 number_match = re.search(r'\d+', part)
                 if number_match:
