@@ -147,10 +147,14 @@ class XLSConnection:
         self.wb.save(self.directory / f"summary_{timestamp}.xlsx")
 
 
+def xls_connection():
+    connector = XLSConnection(config.directories.out_directory)
+    connector.create_out_xlsx()
+    connector.copy_data_to_out_xlsx()
+    connector.calculation_summary()
+    connector.styled_table()
+    connector.save_xlsx()
+
+
 if __name__ == "__main__":
-    xls_connection = XLSConnection(config.directories.out_directory)
-    xls_connection.create_out_xlsx()
-    xls_connection.copy_data_to_out_xlsx()
-    xls_connection.calculation_summary()
-    xls_connection.styled_table()
-    xls_connection.save_xlsx()
+    xls_connection()

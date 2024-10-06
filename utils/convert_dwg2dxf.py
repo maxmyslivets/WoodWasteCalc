@@ -13,7 +13,7 @@ def check_converter_in_system() -> bool:
 
 def install_converter() -> None:
 
-    source_file = Path(__file__).parent / "ODA/ODAFileConverter.exe"    # TODO: исправить доступ к директории
+    source_file = "ODA/ODAFileConverter.exe"
     destination_file = Path(r'C:\Windows\System32') / "ODAFileConverter.exe"
 
     try:
