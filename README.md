@@ -9,6 +9,13 @@
 
 ## Настройка файла конфигурации `config.ini`
 
+#### GUI
+
+```ini
+# Оконный режим
+gui = True
+```
+
 #### DIRECTORIES
 
 ```ini
