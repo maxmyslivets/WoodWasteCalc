@@ -45,6 +45,10 @@ class Directories(ConfigSection):
     def out_directory(self) -> Path:
         return Path(self.get('out_directory'))
 
+    @property
+    def converter_path(self) -> Path:
+        return Path(self.get('converter_path'))
+
 
 class TaxationCharacteristics(ConfigSection):
 

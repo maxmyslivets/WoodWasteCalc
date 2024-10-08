@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
         import os
 
-        from utils.convert_dwg2dxf import convert_dwg_to_dxf
+        from utils.dwg_converting import dwg2dxf
         from utils.table_extraction import table_extraction_from_dxf
         from not_gui.wood_waste_calc_terminal import main
         from utils.xls_connection import xls_connection
@@ -29,7 +29,7 @@ if __name__ == '__main__':
             menu = input(f"Выберите действие: ")
             if menu == '1':
                 print("Выполняется конвертация ...")
-                convert_dwg_to_dxf()
+                dwg2dxf()
                 print("Выполнено")
             elif menu == '2':
                 print("Выполняется извлечение таблиц ...")

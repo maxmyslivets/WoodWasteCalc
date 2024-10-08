@@ -67,7 +67,7 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/Projects/WoodWasteCalc/ODA;ODA/"
+   "value": "C:/Projects/WoodWasteCalc/utils;utils/"
   }
  ],
  "nonPyinstallerOptions": {
