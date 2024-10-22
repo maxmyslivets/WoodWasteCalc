@@ -135,4 +135,11 @@ class ValidXLS:
             except Exception as e:
                 is_valid = False
 
+            # создание объекта дерева
+            try:
+                raw_wood.parse()
+            except Exception as e:
+                print(f"`{self.file.name}` [{raw_wood}] - Ошибка создания объекта дерева. {e}")
+                is_valid = False
+
         return is_valid

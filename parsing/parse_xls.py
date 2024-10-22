@@ -60,12 +60,16 @@ class RawWood:
                 start, end = part.split('-')
                 try:
                     try:
+                        is_float = False
                         start = int(start)
                         end = int(end)
+                        result.extend([str(_) for _ in range(int(start), int(end) + 1)])
                     except ValueError as e:
+                        is_float = True
+                        int_number_part = str(start.split('.')[0])
                         start = start.split('.')[1]
                         end = end.split('.')[1]
-                    result.extend([str(_) for _ in range(int(start), int(end) + 1)])
+                        result.extend([int_number_part+'.'+str(_) for _ in range(int(start), int(end) + 1)])
                 # WARNING опасный костыль !!!!!!!!!!!!!!!
                 # работает только для номеров типа `32 -32а`, где подразумевается только два номера
                 except AttributeError as e:
@@ -145,11 +149,13 @@ class RawWood:
                 # Специальный случай для "-"
                 result.append(2.0)
 
+        if self.trunk_count > len(result):
+            result *= self.trunk_count
         if len(result) < len(self.number):
-            if len(result) == 1 and not self.is_shrub:
-                result *= len(self.number)
-            else:
-                raise ParseDiameterError(f"Диаметров меньше чем номеров")
+            # if len(result) == 1 and not self.is_shrub:
+            result *= len(self.number)
+            # else:
+            #     raise ParseDiameterError(f"Диаметров меньше чем номеров")
         if len(result) > len(self.number) and not self.quantity_is_area:
             if not self.trunk_count > len(self.number) == 1:
                 if len(self.number) == 1 and len(self.number[0]) == len(self._number):
@@ -208,11 +214,13 @@ class RawWood:
                     h = float(number_match.group())
                     result.append(h - 0.5 if h > 0.5 else h)
 
+        if self.trunk_count > len(result):
+            result *= self.trunk_count
         if len(result) < len(self.number):
-            if len(result) == 1 and not self.is_shrub:
+            # if len(result) == 1 and not self.is_shrub:
                 result *= len(self.number)
-            else:
-                raise ParseDiameterError(f"Высот меньше чем номеров")
+            # else:
+            #     raise ParseDiameterError(f"Высот меньше чем номеров")
         if len(result) > len(self.number) and not self.quantity_is_area:
             if not self.trunk_count > len(self.number) == 1:
                 if len(self.number) == 1 and len(self.number[0]) == len(self._number):
@@ -236,21 +244,23 @@ class RawWood:
 
         woods = []
 
-        try:
-            for idx_wood in range(len(self.number)):
-                trunks = []
-                if self.trunk_count > 1:
-                    for idx_trunk in range(self.trunk_count):
-                        trunks.append(Trunk(diameter=self.diameter[idx_trunk], height=self.height[idx_trunk]))
-                    woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
-                                      is_shrub=self.is_shrub, trunks=trunks))
-                else:
-                    trunks.append(Trunk(diameter=self.diameter[idx_wood], height=self.height[idx_wood]))
-                    woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
-                                      is_shrub=self.is_shrub, trunks=trunks,
-                                      area=self.quantity if self.quantity_is_area else None))
-        except Exception as e:
-            raise ParseError(f"Ошибка получения объекта дерева {self.__repr__()}. {e}")
+        # try:
+        for idx_wood in range(len(self.number)):
+            trunks = []
+            if self.trunk_count > 1:
+                for idx_trunk in range(self.trunk_count):
+                    trunks.append(Trunk(diameter=self.diameter[idx_trunk], height=self.height[idx_trunk]))
+                woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
+                                  is_shrub=self.is_shrub, trunks=trunks))
+            else:
+                trunks.append(Trunk(diameter=self.diameter[idx_wood], height=self.height[idx_wood]))
+                woods.append(Wood(name=self._name, number=self.number[idx_wood], specie=self.specie,
+                                  is_shrub=self.is_shrub, trunks=trunks,
+                                  area=self.quantity if self.quantity_is_area else None))
+        # except Exception as e:
+        #     import traceback
+        #     print(traceback.format_exc())
+        #     raise ParseError(f"Ошибка получения объекта дерева {self.__repr__()}. {e}")
 
         return woods
 
