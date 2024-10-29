@@ -38,7 +38,7 @@ def xls_write(data: list, path: str) -> None:
     wb.save(path)
 
 
-def table_extraction_from_dxf():
+def table_extraction_from_dxf(files: list[str]):
 
     config = Config()
 
@@ -54,12 +54,7 @@ def table_extraction_from_dxf():
     columns = [item[1] for item in sorted_structure]
 
     # экспорт таблиц из dxf в xls
-    for dxf_file in [file for file in config.directories.dxf_directory.iterdir() if file.is_file()]:
+    for dxf_file in files:
         data, xls_filename = dxf_parse(dxf_file)
         data.insert(0, columns)
         xls_write(data, config.directories.xls_directory / (xls_filename + '.xlsx'))
-
-
-if __name__ == '__main__':
-
-    table_extraction_from_dxf()

@@ -14,11 +14,12 @@ class ValidXLS:
     """
     Класс для проверки XLS файла на корректность
     """
-    def __init__(self, filepath: Path) -> None:
+    def __init__(self, filepath: Path, log) -> None:
         """
         :param filepath: путь к файлу XLS
         """
         self.file = filepath
+        self.log = log
         self.shrub_species, self.wood_species = Species().get_species()
         with (open(config.taxation_characteristics.density_json_path, 'r', encoding='utf-8') as file):
             data = json.load(file)
@@ -46,7 +47,7 @@ class ValidXLS:
         Проверка на корректность данный в файле XLS
         """
 
-        print(f"Валидация файла `{self.file.name}` ...")
+        self.log(f"Валидация файла `{self.file.name}` ...")
 
         is_valid = True
 
@@ -62,7 +63,7 @@ class ValidXLS:
             if not self.check_specie(specie) and specie not in unknown_specie:
                 unknown_specie.append(specie)
         if len(unknown_specie) != 0:
-            print(f"`{self.file.name}` - Обнаружены неизвестные породы: {unknown_specie}")
+            self.log(f"`{self.file.name}` - Обнаружены неизвестные породы: {unknown_specie}")
             is_valid = False
 
         # обнаружение пород с неизвестной плотностью древесины
@@ -71,7 +72,7 @@ class ValidXLS:
             if not self.check_density(specie) and specie not in unknown_density:
                 unknown_density.append(specie)
         if len(unknown_density) != 0:
-            print(f"`{self.file.name}` - Обнаружены породы с неизвестной плотностью древесины: {unknown_density}")
+            self.log(f"`{self.file.name}` - Обнаружены породы с неизвестной плотностью древесины: {unknown_density}")
             is_valid = False
 
         for row in table:
@@ -81,14 +82,14 @@ class ValidXLS:
             try:
                 raw_wood.parse_number()
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения списка номеров. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения списка номеров. {e}")
                 is_valid = False
 
             # парсинг породы
             try:
                 raw_wood.parse_specie()
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения породы. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения породы. {e}")
                 is_valid = False
 
             # парсинг количества
@@ -102,7 +103,7 @@ class ValidXLS:
                     #       f"из-за ошибки в извлечении списка номеров")
                     is_valid = False
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения количества/площади. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения количества/площади. {e}")
                 is_valid = False
 
             # парсинг диаметра
@@ -113,7 +114,7 @@ class ValidXLS:
                 #       f"из-за ошибки в извлечении предыдущих данных. {e}")
                 is_valid = False
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения диаметра. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения диаметра. {e}")
                 is_valid = False
 
             # парсинг высоты
@@ -124,13 +125,13 @@ class ValidXLS:
                 #       f"из-за ошибки в извлечении предыдущих данных. {e}")
                 is_valid = False
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения высоты. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка извлечения высоты. {e}")
                 is_valid = False
 
             # сравнение количества диаметров и высот
             try:
                 if len(raw_wood.height) != len(raw_wood.diameter) and '-' not in raw_wood._diameter:
-                    print(f"`{self.file.name}` [{raw_wood}] - Неравное количество диаметров и высот.")
+                    self.log(f"`{self.file.name}` [{raw_wood}] - Неравное количество диаметров и высот.")
                     is_valid = False
             except Exception as e:
                 is_valid = False
@@ -139,7 +140,7 @@ class ValidXLS:
             try:
                 raw_wood.parse()
             except Exception as e:
-                print(f"`{self.file.name}` [{raw_wood}] - Ошибка создания объекта дерева. {e}")
+                self.log(f"`{self.file.name}` [{raw_wood}] - Ошибка создания объекта дерева. {e}")
                 is_valid = False
 
         return is_valid

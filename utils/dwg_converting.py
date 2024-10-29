@@ -4,10 +4,9 @@ import subprocess
 from config.config import Config
 
 
-def dwg2dxf() -> None:
+def dwg2dxf(input_dir: Path) -> None:
 
     config = Config()
-    input_dir = config.directories.dwg_directory.absolute()
     output_dir = config.directories.dxf_directory.absolute()
     converter_path = config.directories.converter_path.absolute()
 
@@ -16,8 +15,7 @@ def dwg2dxf() -> None:
         if isinstance(path, Path) and ' ' in str(path):
             invalid_path.append(str(path))
     if invalid_path:
-        print(f"Invalid paths: {invalid_path}\nПереместите папку с программой в директорию без пробелов в именах папок.")
-        return
+        raise NameError(f"Invalid paths: {invalid_path}\nПереместите папку с программой в директорию без пробелов в именах папок.")
 
     # Output version: ACAD9, ACAD10, ACAD12, ACAD14, ACAD2000, ACAD2004, ACAD2007, ACAD20010, ACAD2013, ACAD2018
     out_ver = "ACAD2018"
