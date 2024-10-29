@@ -67,7 +67,6 @@ class WasteCalculation(Wood):
 
         # Сохраняем рабочую книгу в файл
         workbook.save(path)
-        print(f"Успешно {path}.")
 
     def __repr__(self) -> str:
         if not self.is_shrub:

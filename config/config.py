@@ -21,12 +21,6 @@ class ConfigSection:
         return self.config.getboolean(self.section, key, fallback=default)
 
 
-class Gui(ConfigSection):
-    @property
-    def gui(self) -> bool:
-        return self.get_bool('gui')
-
-
 class Directories(ConfigSection):
 
     @property
@@ -92,10 +86,6 @@ class Config:
     def __init__(self, filename: Path = Path('config.ini')):
         self.config = configparser.ConfigParser()
         self.config.read(filename, encoding='utf-8')
-
-    @property
-    def gui(self):
-        return Gui(self.config, 'GUI')
 
     @property
     def directories(self):
