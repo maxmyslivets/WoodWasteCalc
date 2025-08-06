@@ -38,7 +38,7 @@ class WasteCalculation(Wood):
                     [self.number if idx == 0 else None, self.name if idx == 0 else None,
                      1, trunk.diameter, trunk.height, trunk.volume, self.density,
                      f"=1*{self.density}/1000*{trunk.volume}", f"=1*{self.density}/1000*{trunk.volume}*0.2",
-                     f"=1*{self.density}/1000*{trunk.volume}*0.11" if idx == 0 else None]
+                     f"=1*{self.density}/1000*{trunk.volume}*0.30" if idx == 0 else None]
                 )
         else:
             self.data.append(
